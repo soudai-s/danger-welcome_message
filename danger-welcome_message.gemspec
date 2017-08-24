@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = WelcomeMessage::VERSION
   spec.authors       = ['soudai-s']
   spec.email         = ['soudai.sasada@hotmail.com']
-  spec.description   = %q{A short description of danger-welcome_message.}
-  spec.summary       = %q{A longer description of danger-welcome_message.}
+  spec.description   = %q{A danger plugin for greeting new members.}
+  spec.summary       = %q{A danger plugin for greeting new members.}
   spec.homepage      = 'https://github.com/soudai-s/danger-welcome_message'
   spec.license       = 'MIT'
 

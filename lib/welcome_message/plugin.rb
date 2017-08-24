@@ -1,33 +1,66 @@
 module Danger
-  # This is your plugin class. Any attributes or methods you expose here will
-  # be available from within your Dangerfile.
+  # Show the greeting on a pull request.
   #
-  # To be published on the Danger plugins site, you will need to have
-  # the public interface documented. Danger uses [YARD](http://yardoc.org/)
-  # for generating documentation from your plugin source, and you can verify
-  # by running `danger plugins lint` or `bundle exec rake spec`.
+  # @example Show the greeting
+  #          welcome_message.greet
   #
-  # You should replace these comments with a public description of your library.
+  # @example When you want to greet with your words
+  #          welcome_message.custom_words = <<-CUSTOM_WORDS
+  #            Hi, @#{github.pr_author}!!
+  #            Welcome to #{github.pr_json[:base][:repo][:full_name]}! Thanks so much for joining us.
+  #          CUSTOM_WORDS
   #
-  # @example Ensure people are well warned about merging on Mondays
+  #          welcome_message.greet
   #
-  #          my_plugin.warn_on_mondays
+  # @example When you want to see the greeting irrespective of the conditions
+  #          welcome_message.greet_test
   #
   # @see  soudai-s/danger-welcome_message
   # @tags monday, weekends, time, rattata
   #
   class DangerWelcomeMessage < Plugin
 
-    # An attribute that you can read/write from your Dangerfile
-    #
-    # @return   [Array<String>]
-    attr_accessor :my_attribute
 
-    # A method that you can call from your Dangerfile
-    # @return   [Array<String>]
+    # Custom words for greeting
     #
-    def warn_on_mondays
-      warn 'Trying to merge code on a Monday' if Date.today.wday == 1
+    # @return [String]
+    attr_writer :custom_words
+
+    # Greet when a new member makes a first pull request
+    #
+    # @return [void]
+    def greet
+      message greeting_words if new_member?
     end
+
+    # Greet every time
+    #
+    # @return [void]
+    def greet_test
+      message greeting_words
+    end
+
+    private
+
+      def repo
+        @repository ||= github.pr_json[:base][:repo][:full_name]
+      end
+
+      def collaborators
+        @collaborators ||= github.api.collaborators(repo).map { |c| c.login }
+      end
+
+      def experienced_people
+        @experienced_people ||= github.api.pull_requests(repo).map { |pr| pr.user.login }.uniq
+      end
+
+      def new_member?
+        new_members = collaborators - experienced_people
+        new_members.include? github.pr_author
+      end
+
+      def greeting_words
+        @custom_words || "Welcome, #{github.pr_author} 🎉"
+      end
   end
 end
